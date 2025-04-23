@@ -1,87 +1,55 @@
 <odoo>
-    <record id="view_backup_config_form" model="ir.ui.view">
-        <field name="name">db.backup.form</field>
-        <field name="model">db.backup</field>
-        <field name="arch" type="xml">
-            <form string="Back-up view">
-                <sheet>
-                    <group col="4" colspan="4">
-                        <separator col="2" string="Local backup configuration"/>
-                    </group>
-                    <group name="configuration">
-                        <field name="host" colspan="2"/>
-                        <field name="name"/>
-                        <field name="port"/>
-                        <field name="backup_type"/>
-                        <field name="folder"/>
-                        <field name="autoremove"/>
-                        <field name="days_to_keep" attrs="{'invisible': [('autoremove','=',False)]}"/>
-                    </group>
-                    <group name="allow_sftp" col="4" colspan="4">
-                        <separator col="2" string="SFTP"/>
-                    </group>
-                    <group>
-                        <label string="⚠️ Use SFTP with caution! This writes files to external servers under the path you specify."
-                               attrs="{'invisible': [('sftp_write','=',False)]}" />
-                    </group>
-                    <group name="sftp_configuration">
-                        <field name="sftp_write"/>
-                        <field name="sftp_host"
-                               attrs="{'invisible':[('sftp_write', '=', False)],'required':[('sftp_write', '=', True)]}"/>
-                        <field name="sftp_port"
-                               attrs="{'invisible':[('sftp_write', '=', False)],'required':[('sftp_write', '=', True)]}"/>
-                        <field name="sftp_user"
-                               attrs="{'invisible':[('sftp_write', '=', False)], 'required':[('sftp_write', '=', True)]}"/>
-                        <field name="sftp_password"
-                               attrs="{'invisible':[('sftp_write', '=', False)],'required': [('sftp_write', '=', True)]}"
-                               password="True"/>
-                        <field name="sftp_path"
-                               attrs="{'invisible':[('sftp_write', '=', False)],'required':[('sftp_write', '=', True)]}"
-                               placeholder="For example: /odoo/backups/"/>
-                        <field name="days_to_keep_sftp"
-                               attrs="{'invisible': [('sftp_write', '=', False)], 'required': [('sftp_write', '=', True)]}"/>
-                        <field name="send_mail_sftp_fail" attrs="{'invisible': [('sftp_write','=',False)]}"/>
-                        <field name="email_to_notify"
-                               attrs="{'invisible':['|',('send_mail_sftp_fail', '=', False), ('sftp_write', '=', False)], 'required': [('send_mail_sftp_fail', '=', True)]}"/>
-                        <button name="test_sftp_connection" type="object"
-                                attrs="{'invisible': [('sftp_write','=',False)]}" string="Test SFTP Connection"/>
-                    </group>
-                    <separator string="Help" colspan="2"/>
-                    <group>
-                        <label string="This configures the scheduler for automatic backup of the given database running on given host at given port on regular intervals."/>
-                        <label string="Automatic backups of the database can be scheduled as follows:"/>
-                        <label string="1. Go to Settings / Technical / Automation / Scheduled Actions."/>
-                        <label string="2. Search the action named 'Backup scheduler'."/>
-                        <label string="3. Set the scheduler to active and fill in how often you want backups generated."/>
-                        <label string="Need more help? Visit: https://github.com/Yenthe666/auto_backup/issues"/>
-                    </group>
-                </sheet>
-            </form>
-        </field>
-    </record>
+    <data>
+        <!-- Action to open db.backup -->
+        <record id="action_db_backup" model="ir.actions.act_window">
+            <field name="name">Database Backups</field>
+            <field name="res_model">db.backup</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create backup configurations to automate your database backups.
+                </p>
+            </field>
+        </record>
 
-    <record id="view_backup_config_tree" model="ir.ui.view">
-        <field name="name">db.backup.tree</field>
-        <field name="model">db.backup</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name='host'/>
-                <field name='port'/>
-                <field name='name'/>
-                <field name='folder'/>
-                <field name="autoremove"/>
-                <field name="sftp_host"/>
-            </tree>
-        </field>
-    </record>
+        <!-- Menu item -->
+        <menuitem id="menu_backup_root" name="Database Backups" sequence="10"/>
+        <menuitem id="menu_backup_config" name="Backup Configurations" parent="menu_backup_root" action="action_db_backup" sequence="1"/>
 
-    <record id="action_backup" model="ir.actions.act_window">
-        <field name="name">Configure back-ups</field>
-        <field name="res_model">db.backup</field>
-        <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="view_backup_config_tree"/>
-    </record>
+        <!-- Tree view -->
+        <record id="view_db_backup_tree" model="ir.ui.view">
+            <field name="name">db.backup.tree</field>
+            <field name="model">db.backup</field>
+            <field name="arch" type="xml">
+                <tree string="Database Backups">
+                    <field name="name"/>
+                    <field name="folder"/>
+                    <field name="backup_type"/>
+                    <field name="autoremove"/>
+                    <field name="days_to_keep"/>
+                </tree>
+            </field>
+        </record>
 
-    <menuitem id="auto_backup_menu" name="Back-ups" parent="base.menu_custom"/>
-    <menuitem parent="auto_backup_menu" action="action_backup" id="backup_conf_menu"/>
+        <!-- Form view -->
+        <record id="view_db_backup_form" model="ir.ui.view">
+            <field name="name">db.backup.form</field>
+            <field name="model">db.backup</field>
+            <field name="arch" type="xml">
+                <form string="Database Backup Configuration">
+                    <sheet>
+                        <group>
+                            <field name="host"/>
+                            <field name="port"/>
+                            <field name="name"/>
+                            <field name="folder"/>
+                            <field name="backup_type"/>
+                            <field name="autoremove"/>
+                            <field name="days_to_keep"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+    </data>
 </odoo>
