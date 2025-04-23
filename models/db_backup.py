@@ -25,6 +25,10 @@ class DbBackup(models.Model):
     _name = 'db.backup'
     _description = 'Backup configuration record'
 
+    name = fields.Char(string='Nama')
+    file_data = fields.Binary(string='File Download')
+    file_name = fields.Char(string='Nama File')
+
     def _get_db_name(self):
         dbName = self._cr.dbname
         return dbName
@@ -45,73 +49,7 @@ class DbBackup(models.Model):
                                        "If you fill in 5 the backups will be removed after 5 days.",
                                   required=True)
 
-    # Columns for external server (SFTP)
-    # sftp_write = fields.Boolean('Write to external server with sftp',
-    #                             help="If you check this option you can specify the details needed to write to a remote "
-    #                                  "server with SFTP.")
-    # sftp_path = fields.Char('Path external server',
-    #                         help='The location to the folder where the dumps should be written to. For example '
-    #                              '/odoo/backups/.\nFiles will then be written to /odoo/backups/ on your remote server.')
-    # sftp_host = fields.Char('IP Address SFTP Server',
-    #                         help='The IP address from your remote server. For example 192.168.0.1')
-    # sftp_port = fields.Integer('SFTP Port', help='The port on the FTP server that accepts SSH/SFTP calls.', default=22)
-    # sftp_user = fields.Char('Username SFTP Server',
-    #                         help='The username where the SFTP connection should be made with. This is the user on the '
-    #                              'external server.')
-    # sftp_password = fields.Char('Password User SFTP Server',
-    #                             help='The password from the user where the SFTP connection should be made with. This '
-    #                                  'is the password from the user on the external server.')
-    # days_to_keep_sftp = fields.Integer('Remove SFTP after x days',
-    #                                    help='Choose after how many days the backup should be deleted from the FTP '
-    #                                         'server. For example:\nIf you fill in 5 the backups will be removed after '
-    #                                         '5 days from the FTP server.',
-    #                                    default=30)
-    # send_mail_sftp_fail = fields.Boolean('Auto. E-mail on backup fail',
-    #                                      help='If you check this option you can choose to automaticly get e-mailed '
-    #                                           'when the backup to the external server failed.')
-    # email_to_notify = fields.Char('E-mail to notify',
-    #                               help='Fill in the e-mail where you want to be notified that the backup failed on '
-    #                                    'the FTP.')
-
-    # def test_sftp_connection(self, context=None):
-    #     self.ensure_one()
-
-    #     # Check if there is a success or fail and write messages
-    #     message_title = ""
-    #     message_content = ""
-    #     error = ""
-    #     has_failed = False
-
-    #     for rec in self:
-    #         ip_host = rec.sftp_host
-    #         port_host = rec.sftp_port
-    #         username_login = rec.sftp_user
-    #         password_login = rec.sftp_password
-
-    #         # Connect with external server over SFTP, so we know sure that everything works.
-    #         try:
-    #             s = paramiko.SSHClient()
-    #             s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    #             s.connect(ip_host, port_host, username_login, password_login, timeout=10)
-    #             sftp = s.open_sftp()
-    #             sftp.close()
-    #             message_title = _("Connection Test Succeeded!\nEverything seems properly set up for FTP back-ups!")
-    #         except Exception as e:
-    #             _logger.critical('There was a problem connecting to the remote ftp: %s', str(e))
-    #             error += str(e)
-    #             has_failed = True
-    #             message_title = _("Connection Test Failed!")
-    #             if len(rec.sftp_host) < 8:
-    #                 message_content += "\nYour IP address seems to be too short.\n"
-    #             message_content += _("Here is what we got instead:\n")
-    #         finally:
-    #             if s:
-    #                 s.close()
-
-    #     if has_failed:
-    #         raise Warning(message_title + '\n\n' + message_content + "%s" % str(error))
-    #     else:
-    #         raise Warning(message_title + '\n\n' + message_content)
+    
 
     @api.model
     def schedule_backup(self):
@@ -139,115 +77,7 @@ class DbBackup(models.Model):
                 _logger.debug("Exact error from the exception: %s", str(error))
                 continue
 
-            # Check if user wants to write to SFTP or not.
-            # if rec.sftp_write is True:
-            #     try:
-            #         # Store all values in variables
-            #         dir = rec.folder
-            #         path_to_write_to = rec.sftp_path
-            #         ip_host = rec.sftp_host
-            #         port_host = rec.sftp_port
-            #         username_login = rec.sftp_user
-            #         password_login = rec.sftp_password
-            #         _logger.debug('sftp remote path: %s', path_to_write_to)
-
-            #         try:
-            #             s = paramiko.SSHClient()
-            #             s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            #             s.connect(ip_host, port_host, username_login, password_login, timeout=20)
-            #             sftp = s.open_sftp()
-            #         except Exception as error:
-            #             _logger.critical('Error connecting to remote server! Error: %s', str(error))
-
-            #         try:
-            #             sftp.chdir(path_to_write_to)
-            #         except IOError:
-            #             # Create directory and subdirs if they do not exist.
-            #             current_directory = ''
-            #             for dirElement in path_to_write_to.split('/'):
-            #                 current_directory += dirElement + '/'
-            #                 try:
-            #                     sftp.chdir(current_directory)
-            #                 except:
-            #                     _logger.info('(Part of the) path didn\'t exist. Creating it now at %s',
-            #                                  current_directory)
-            #                     # Make directory and then navigate into it
-            #                     sftp.mkdir(current_directory, 777)
-            #                     sftp.chdir(current_directory)
-            #                     pass
-            #         sftp.chdir(path_to_write_to)
-            #         # Loop over all files in the directory.
-            #         for f in os.listdir(dir):
-            #             if rec.name in f:
-            #                 fullpath = os.path.join(dir, f)
-            #                 if os.path.isfile(fullpath):
-            #                     try:
-            #                         sftp.stat(os.path.join(path_to_write_to, f))
-            #                         _logger.debug(
-            #                             'File %s already exists on the remote FTP Server ------ skipped', fullpath)
-            #                     # This means the file does not exist (remote) yet!
-            #                     except IOError:
-            #                         try:
-            #                             sftp.put(fullpath, os.path.join(path_to_write_to, f))
-            #                             _logger.info('Copying File % s------ success', fullpath)
-            #                         except Exception as err:
-            #                             _logger.critical(
-            #                                 'We couldn\'t write the file to the remote server. Error: %s', str(err))
-
-            #         # Navigate in to the correct folder.
-            #         sftp.chdir(path_to_write_to)
-
-            #         _logger.debug("Checking expired files")
-            #         # Loop over all files in the directory from the back-ups.
-            #         # We will check the creation date of every back-up.
-            #         for file in sftp.listdir(path_to_write_to):
-            #             if rec.name in file:
-            #                 # Get the full path
-            #                 fullpath = os.path.join(path_to_write_to, file)
-            #                 # Get the timestamp from the file on the external server
-            #                 timestamp = sftp.stat(fullpath).st_mtime
-            #                 createtime = datetime.datetime.fromtimestamp(timestamp)
-            #                 now = datetime.datetime.now()
-            #                 delta = now - createtime
-            #                 # If the file is older than the days_to_keep_sftp (the days to keep that the user filled in
-            #                 # on the Odoo form it will be removed.
-            #                 if delta.days >= rec.days_to_keep_sftp:
-            #                     # Only delete files, no directories!
-            #                     if ".dump" in file or '.zip' in file:
-            #                         _logger.info("Delete too old file from SFTP servers: %s", file)
-            #                         sftp.unlink(file)
-            #         # Close the SFTP session.
-            #         sftp.close()
-            #         s.close()
-            #     except Exception as e:
-            #         try:
-            #             sftp.close()
-            #             s.close()
-            #         except:
-            #             pass
-            #         _logger.error('Exception! We couldn\'t back up to the FTP server. Here is what we got back '
-            #                       'instead: %s', str(e))
-            #         # At this point the SFTP backup failed. We will now check if the user wants
-            #         # an e-mail notification about this.
-            #         if rec.send_mail_sftp_fail:
-            #             try:
-            #                 ir_mail_server = self.env['ir.mail_server'].search([], order='sequence asc', limit=1)
-            #                 message = "Dear,\n\nThe backup for the server " + rec.host + " (IP: " + rec.sftp_host + \
-            #                           ") failed. Please check the following details:\n\nIP address SFTP server: " + \
-            #                           rec.sftp_host + "\nUsername: " + rec.sftp_user + \
-            #                           "\n\nError details: " + tools.ustr(e) + \
-            #                           "\n\nWith kind regards"
-            #                 catch_all_domain = self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain")
-            #                 response_mail = "auto_backup@%s" % catch_all_domain if catch_all_domain else self.env.user.partner_id.email
-            #                 msg = ir_mail_server.build_email(response_mail, [rec.email_to_notify],
-            #                                                  "Backup from " + rec.host + "(" + rec.sftp_host +
-            #                                                  ") failed",
-            #                                                  message)
-            #                 ir_mail_server.send_email(msg)
-            #             except Exception:
-            #                 pass
-
-            # Remove all old files (on local server) in case this is configured..
+            
             if rec.autoremove:
                 directory = rec.folder
                 # Loop over all files in the directory.
@@ -266,13 +96,7 @@ class DbBackup(models.Model):
                                 _logger.info("Delete local out-of-date file: %s", fullpath)
                                 os.remove(fullpath)
 
-    # This is more or less the same as the default Odoo function at
-    # https://github.com/odoo/odoo/blob/e649200ab44718b8faefc11c2f8a9d11f2db7753/odoo/service/db.py#L209
-    # The main difference is that we do not do have a wrapper for the function check_db_management_enabled here and
-    # that we authenticate based on the cron its user id and by checking if we have 'db.backup' defined in the function
-    # call. Since this function is called from the cron and since we have these security checks on model and on user_id
-    # its pretty impossible to hack any way to take a backup. This allows us to disable the Odoo database manager
-    # which is a MUCH safer way
+   
     def _take_dump(self, db_name, stream, model, backup_format='zip'):
         """Dump database `db` into file-like object `stream` if stream is None
         return a file object with the dump """
@@ -327,3 +151,23 @@ class DbBackup(models.Model):
             'modules': modules,
         }
         return manifest
+    
+    def action_generate_file(self):
+        # Ganti bagian ini dengan file hasil koneksi SFTP kamu
+        file_path = "/tmp/sftp_hasil_export.zip"
+        try:
+            with open(file_path, "rb") as f:
+                file_data = f.read()
+
+            self.write({
+                'file_data': base64.b64encode(file_data),
+                'file_name': 'sftp_export.zip',
+            })
+        except Exception as e:
+            raise UserError(f"Gagal membaca file: {e}")
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content?model={self._name}&id={self.id}&field=file_data&filename_field=file_name&download=true',
+            'target': 'self',
+        }
