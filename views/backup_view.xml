@@ -46,6 +46,7 @@
                             <field name="backup_type"/>
                             <field name="autoremove"/>
                             <field name="days_to_keep"/>
+                            <button name="action_backup_now" string="Backup Sekarang" type="object" class="btn-primary"/>
                         </group>
                     </sheet>
                 </form>
