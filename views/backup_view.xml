@@ -56,7 +56,7 @@
             <field name="name">Configure back-ups</field>
             <field name="res_model">db.backup</field>
             <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_backup_config_tree"/>
+            <field name="view_id" ref="view_db_backup_tree"/>
         </record>
         <menuitem id="auto_backup_menu" name="Back-ups" parent="base.menu_custom"/>
         <menuitem parent="auto_backup_menu" action="action_backup" id="backup_conf_menu"/>
