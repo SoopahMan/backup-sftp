@@ -102,7 +102,7 @@ class DbBackup(models.Model):
                                 os.remove(fullpath)
 
     def _take_dump(self, db_name, stream, model, backup_format='zip'):
-        cron_user_id = self.env.ref('auto_backup.backup_scheduler').user_id.id
+        cron_user_id = self.env.ref('backup-sftp.backup_scheduler').user_id.id
         if self._name != 'db.backup' or (self.env.user.id != cron_user_id and not self.env.user.has_group('base.group_system')):
             _logger.error('Unauthorized database operation. Backups should only be available from the cron job.')
             raise AccessDenied()

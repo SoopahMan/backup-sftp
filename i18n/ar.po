@@ -45,7 +45,7 @@ msgstr "إزالة النسخ الاحتياطية تلقائياً"
 msgid "Automatic backups of the database can be scheduled as follows:"
 msgstr "النسخ الاحتياطي التلقائي لقاعدة البيانات يمكن جدولته كالتالي"
 
-#. module: auto_backup
+#. module: 
 #: field:db.backup,bkp_dir:0
 msgid "Backup Directory"
 msgstr "دليل النسخ الاحتياطي"
