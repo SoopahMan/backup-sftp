@@ -32,5 +32,6 @@
         'security/ir.model.access.csv',
         'views/backup_view.xml',
         'data/backup_data.xml',
+        'views/backup_scp_view.xml',
     ],
 }

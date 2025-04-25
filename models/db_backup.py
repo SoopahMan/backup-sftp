@@ -5,6 +5,7 @@ import shutil
 import json
 import tempfile
 import base64
+import subprocess
 
 from odoo import models, fields, api, tools, _
 from odoo.exceptions import Warning, AccessDenied, UserError
@@ -64,6 +65,29 @@ class DbBackup(models.Model):
         except Exception as error:
             _logger.error("Error while doing manual backup: %s", str(error))
             raise UserError("Gagal melakukan backup sekarang: %s" % str(error))
+        
+    def action_send_scp_only(self):
+        self.ensure_one()
+
+        if not self.file_name:
+            raise UserError("Tidak ada file backup yang tersedia untuk dikirim.")
+
+        file_path = os.path.join(self.folder, self.file_name)
+        if not os.path.isfile(file_path):
+            raise UserError(f"File tidak ditemukan di path: {file_path}")
+
+        if self.scp_user and self.scp_host and self.scp_path and self.scp_private_key:
+            try:
+                subprocess.run([
+                    'scp', '-i', self.scp_private_key,
+                    file_path,
+                    f"{self.scp_user}@{self.scp_host}:{self.scp_path}"
+                ], check=True)
+            except subprocess.CalledProcessError as e:
+                _logger.error(f"SCP transfer failed: {e}")
+                raise UserError(f"Gagal mengirim file lewat SCP: {e}")
+        else:
+            raise UserError("Konfigurasi SCP belum lengkap.")
 
     @api.model
     def schedule_backup(self):
@@ -171,3 +195,5 @@ class DbBackup(models.Model):
             'url': f'/web/content?model={self._name}&id={self.id}&field=file_data&filename_field=file_name&download=true',
             'target': 'self',
         }
+    
+

@@ -61,5 +61,8 @@
         </record>
         <menuitem id="auto_backup_menu" name="Back-ups" parent="base.menu_custom"/>
         <menuitem parent="auto_backup_menu" action="action_backup" id="backup_conf_menu"/>
+
+        
+
     </data>
 </odoo>
