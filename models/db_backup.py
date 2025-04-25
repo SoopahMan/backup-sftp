@@ -66,20 +66,6 @@ class DbBackup(models.Model):
             raise UserError("Gagal melakukan backup sekarang: %s" % str(error))
 
     @api.model
-    def create(self, vals):
-        backup_folder = vals.get('folder') or '/opt/odoo/backups'
-
-    # Cek apakah direktori ada, jika tidak maka buat
-    if not os.path.isdir(backup_folder):
-        try:
-            os.makedirs(backup_folder, exist_ok=True)
-            # Ubah owner folder ke user Odoo (jika perlu dan kamu tahu usernya)
-            # os.chown(backup_folder, uid, gid)
-        except PermissionError as e:
-            raise UserError(f"Gagal membuat direktori backup: {backup_folder}. Periksa permission. Error: {e}")
-        except Exception as e:
-            raise UserError(f"Terjadi kesalahan saat membuat folder backup: {e}")
-
     def schedule_backup(self):
         conf_ids = self.search([])
         for rec in conf_ids:
