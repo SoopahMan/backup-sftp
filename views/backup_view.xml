@@ -76,7 +76,7 @@
         </record>
 
         <!-- Action Window untuk wizard SCP -->
-        <record id="view_backup_scp_wizard_form" model="ir.actions.act_window">
+        <record id="view_backup_scp_wizard_form" model="ir.ui.view">
             <field name="name">Kirim Backup via SCP</field>
             <field name="res_model">db.backup.scp.wizard</field>
             <field name="view_mode">form</field>
