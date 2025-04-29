@@ -1,23 +1,21 @@
 <odoo>
     <data>
-        <!-- Action to open db.backup -->
-        <record id="action_db_backup" model="ir.actions.act_window">
-            <field name="name">Database Backups</field>
+        <!-- Root Menu -->
+        <menuitem id="menu_backup_root" name="Database Backups" sequence="10"/>
+
+        <!-- Action untuk konfigurasi backup -->
+        <record id="action_backup" model="ir.actions.act_window">
+            <field name="name">Configure back-ups</field>
             <field name="res_model">db.backup</field>
             <field name="view_mode">tree,form</field>
-            <field name="help" type="html">
-                <p class="o_view_nocontent_smiling_face">
-                    Create backup configurations to automate your database backups.
-                </p>
-            </field>
         </record>
 
-        <!-- Menu item -->
-        <menuitem id="menu_backup_root" name="Database Backups" sequence="10"/>
-        <menuitem id="menu_backup_config" name="Backup Configurations" parent="menu_backup_root" action="action_backup" sequence="1"/>
-       
-    
-
+        <!-- Menu Backup Configurations -->
+        <menuitem id="menu_backup_configurations"
+                  name="Backup Configurations"
+                  parent="menu_backup_root"
+                  action="action_backup"
+                  sequence="1"/>
 
         <!-- Tree view -->
         <record id="view_db_backup_tree" model="ir.ui.view">
@@ -56,57 +54,56 @@
             </field>
         </record>
 
-        <record id="action_backup" model="ir.actions.act_window">
-            <field name="name">Configure back-ups</field>
-            <field name="res_model">db.backup</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_db_backup_tree"/>
+        <!-- View Form Wizard SCP -->
+        <record id="view_backup_scp_wizard_form_view" model="ir.ui.view">
+            <field name="name">db.backup.scp.wizard.form</field>
+            <field name="model">db.backup.scp.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Kirim Backup via SCP">
+                    <group>
+                        <field name="scp_user"/>
+                        <field name="scp_host"/>
+                        <field name="scp_path"/>
+                        <field name="scp_private_key"/>
+                        <field name="backup_ids" widget="many2many_tags" readonly="1"/>
+                    </group>
+                    <footer>
+                        <button string="Kirim" type="object" name="action_send" class="btn-primary"/>
+                        <button string="Batal" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
         </record>
 
-        
+        <!-- Action Window untuk wizard SCP -->
+        <record id="view_backup_scp_wizard_form" model="ir.actions.act_window">
+            <field name="name">Kirim Backup via SCP</field>
+            <field name="res_model">db.backup.scp.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_backup_scp_wizard_form_view"/>
+            <field name="target">new</field>
+        </record>
 
-        <record id="view_backup_scp_wizard_form" model="ir.ui.view">
-        <field name="name">db.backup.scp.wizard.form</field>
-        <field name="model">db.backup.scp.wizard</field>
-        <field name="arch" type="xml">
-            <form string="Kirim Backup via SCP">
-                <group>
-                    <field name="scp_user"/>
-                    <field name="scp_host"/>
-                    <field name="scp_path"/>
-                    <field name="scp_private_key"/>
-                    <field name="backup_ids" widget="many2many_tags" readonly="1"/>
-                </group>
-                <footer>
-                    <button string="Kirim" type="object" name="action_send" class="btn-primary"/>
-                    <button string="Batal" class="btn-secondary" special="cancel"/>
-                </footer>
-            </form>
-        </field>
-    </record>
-
-    <!-- Server Action -->
-    <record id="action_open_scp_wizard" model="ir.actions.server">
-        <field name="name">Kirim via SCP</field>
-        <field name="model_id" ref="model_db_backup"/>
-        <field name="binding_model_id" ref="model_db_backup"/>
-        <field name="binding_view_types">tree</field>
-        <field name="state">code</field>
-        <field name="code">
-            action = {
-                'type': 'ir.actions.act_window',
-                'name': 'Kirim via SCP',
-                'res_model': 'db.backup.scp.wizard',
-                'view_mode': 'form',
-                'target': 'new',
-                'context': {
-                    'default_backup_ids': [r.id for r in records],
+        <!-- Server Action (dari view tree) -->
+        <record id="action_open_scp_wizard" model="ir.actions.server">
+            <field name="name">Kirim via SCP</field>
+            <field name="model_id" ref="model_db_backup"/>
+            <field name="binding_model_id" ref="model_db_backup"/>
+            <field name="binding_view_types">tree</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = {
+                    'type': 'ir.actions.act_window',
+                    'name': 'Kirim via SCP',
+                    'res_model': 'db.backup.scp.wizard',
+                    'view_mode': 'form',
+                    'target': 'new',
+                    'context': {
+                        'default_backup_ids': [r.id for r in records],
+                    }
                 }
-            }
-        </field>
-    </record>
-     <menuitem id="menu_backup_config" name="SCP Wizard" parent="menu_backup_root" action="view_backup_scp_wizard_form" sequence="20"/>
-        
+            </field>
+        </record>
 
     </data>
 </odoo>
