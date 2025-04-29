@@ -55,6 +55,7 @@
         </record>
 
         <!-- View Form Wizard SCP -->
+       <!-- View Form Wizard SCP -->
         <record id="view_backup_scp_wizard_form_view" model="ir.ui.view">
             <field name="name">db.backup.scp.wizard.form</field>
             <field name="model">db.backup.scp.wizard</field>
@@ -76,13 +77,14 @@
         </record>
 
         <!-- Action Window untuk wizard SCP -->
-        <record id="view_backup_scp_wizard_form" model="ir.ui.view">
+        <record id="action_backup_scp_wizard" model="ir.actions.act_window">
             <field name="name">Kirim Backup via SCP</field>
             <field name="res_model">db.backup.scp.wizard</field>
             <field name="view_mode">form</field>
             <field name="view_id" ref="view_backup_scp_wizard_form_view"/>
             <field name="target">new</field>
         </record>
+
 
         <!-- Server Action (dari view tree) -->
         <record id="action_open_scp_wizard" model="ir.actions.server">
