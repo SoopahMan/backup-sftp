@@ -84,6 +84,13 @@
             <field name="view_id" ref="view_backup_scp_wizard_form_view"/>
             <field name="target">new</field>
         </record>
+        
+        <menuitem id="menu_backup_scp_wizard"
+          name="SCP Wizard"
+          parent="menu_backup_root"
+          action="action_backup_scp_wizard"
+          sequence="20"/>
+
 
 
         <!-- Server Action (dari view tree) -->
