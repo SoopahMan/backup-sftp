@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-admin_access, db_backup admin access,model_db_backup,base.group_no_one,1,1,1,1
+admin_access_backup,db_backup access,model_db_backup,base.group_user,1,1,1,1
+admin_access_scp_wizard,db_backup_scp_wizard access,model_db_backup_scp_wizard,base.group_user,1,1,1,1

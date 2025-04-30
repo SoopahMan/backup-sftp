@@ -15,7 +15,7 @@
                   name="Backup Configurations"
                   parent="menu_backup_root"
                   action="action_backup"
-                  sequence="1"/>
+                  />
 
         <!-- Tree view -->
         <record id="view_db_backup_tree" model="ir.ui.view">
@@ -89,7 +89,7 @@
           name="SCP Wizard"
           parent="menu_backup_root"
           action="action_backup_scp_wizard"
-          sequence="20"/>
+        />
 
 
 
