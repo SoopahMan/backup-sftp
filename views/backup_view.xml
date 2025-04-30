@@ -1,5 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <data>
+
         <!-- Root Menu -->
         <menuitem id="menu_backup_root" name="Database Backups" sequence="10"/>
 
@@ -15,7 +17,7 @@
                   name="Backup Configurations"
                   parent="menu_backup_root"
                   action="action_backup"
-                  />
+        />
 
         <!-- Tree view -->
         <record id="view_db_backup_tree" model="ir.ui.view">
@@ -28,19 +30,11 @@
                     <field name="backup_type"/>
                     <field name="autoremove"/>
                     <field name="days_to_keep"/>
+                    <!-- Tombol Aksi Kirim via SCP -->
+                    <button name="%(action_open_scp_wizard)d" string="Kirim via SCP" type="action" class="btn-primary"/>
                 </tree>
             </field>
         </record>
-
-        <!-- <act_window id="backup_tree_action_scp"
-                name="Kirim via SCP"
-                src_model="db.backup"                    binding_model_id="model_db_backup"
-                binding_view_types="tree"
-                res_model="db.backup.scp.wizard"
-                view_mode="form"
-                target="new"
-                context="{'default_backup_ids': active_ids}"/> -->
-            
 
         <!-- Form view -->
         <record id="view_db_backup_form" model="ir.ui.view">
@@ -59,13 +53,16 @@
                             <field name="days_to_keep"/>
                             <button name="action_backup_now" string="Backup Sekarang" type="object" class="btn-primary"/>
                         </group>
+                        <footer>
+                            <!-- Tombol Aksi Kirim via SCP -->
+                            <button name="%(action_open_scp_wizard)d" string="Kirim via SCP" type="action" class="btn-primary"/>
+                        </footer>
                     </sheet>
                 </form>
             </field>
         </record>
 
         <!-- View Form Wizard SCP -->
-       <!-- View Form Wizard SCP -->
         <record id="view_backup_scp_wizard_form_view" model="ir.ui.view">
             <field name="name">db.backup.scp.wizard.form</field>
             <field name="model">db.backup.scp.wizard</field>
@@ -94,16 +91,13 @@
             <field name="view_id" ref="view_backup_scp_wizard_form_view"/>
             <field name="target">new</field>
         </record>
-        
 
-
-
-        <!-- Server Action (dari view tree) -->
+        <!-- Server Action untuk dipanggil dari tree view -->
         <record id="action_open_scp_wizard" model="ir.actions.server">
             <field name="name">Kirim via SCP</field>
             <field name="model_id" ref="model_db_backup"/>
             <field name="binding_model_id" ref="model_db_backup"/>
-            <field name="binding_view_types">tree</field>
+            <field name="binding_view_types">tree,form</field>
             <field name="state">code</field>
             <field name="code">
                 action = {
@@ -118,11 +112,6 @@
                 }
             </field>
         </record>
-        <menuitem id="menu_backup_scp_wizard"
-          name="SCP Wizard"
-          parent="menu_backup_root"
-          action="action_open_scp_wizard"
-        />
 
     </data>
 </odoo>
