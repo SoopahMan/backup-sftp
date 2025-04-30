@@ -25,14 +25,5 @@ class DbBackupSCPWizard(models.TransientModel):
 
     def action_send(self):
         for backup in self.backup_ids:
-            file_path = os.path.join(backup.folder, backup.file_name)
-            if not os.path.exists(file_path):
-                raise UserError(f"File tidak ditemukan: {file_path}")
-            try:
-                subprocess.run([
-                    'scp', '-i', self.scp_private_key,
-                    file_path,
-                    f"{self.scp_user}@{self.scp_host}:{self.scp_path}"
-                ], check=True)
-            except subprocess.CalledProcessError as e:
-                raise UserError(f"Gagal mengirim file: {e}")
+            # Simulasi logika kirim SCP
+            _logger.info(f"Kirim backup {backup.name} ke {self.scp_user}@{self.scp_host}:{self.scp_path}")
