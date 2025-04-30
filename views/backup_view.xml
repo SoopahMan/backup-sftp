@@ -95,19 +95,14 @@
             <field name="target">new</field>
         </record>
         
-        <menuitem id="menu_backup_scp_wizard"
-          name="SCP Wizard"
-          parent="menu_backup_root"
-          action="action_backup_scp_wizard"
-        />
 
 
 
         <!-- Server Action (dari view tree) -->
         <record id="action_open_scp_wizard" model="ir.actions.server">
             <field name="name">Kirim via SCP</field>
-            <field name="model_id" ref="db.backup"/>
-            <field name="binding_model_id" ref="db.backup"/>
+            <field name="model_id" ref="model_db_backup"/>
+            <field name="binding_model_id" ref="model_db_backup"/>
             <field name="binding_view_types">tree</field>
             <field name="state">code</field>
             <field name="code">
@@ -123,6 +118,11 @@
                 }
             </field>
         </record>
+        <menuitem id="menu_backup_scp_wizard"
+          name="SCP Wizard"
+          parent="menu_backup_root"
+          action="action_open_scp_wizard"
+        />
 
     </data>
 </odoo>
