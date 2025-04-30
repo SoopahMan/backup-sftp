@@ -113,7 +113,7 @@
                     'view_mode': 'form',
                     'target': 'new',
                     'context': {
-                        'default_backup_ids': [r.id for r in records],
+                        'default_backup_ids': active_ids or [],
                     }
                 }
             </field>
