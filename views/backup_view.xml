@@ -32,15 +32,17 @@
             </field>
         </record>
 
-        <act_window id="backup_tree_action_scp"
-            name="Kirim via SCP"
-            src_model="db.backup"
-            binding_model_id="model_db_backup"
-            binding_view_types="tree"
-            res_model="db.backup.scp.wizard"
-            view_mode="form"
-            target="new"
-            context="{'default_backup_ids': active_ids}"/>
+        <record id="db_scp_action_window" model="ir.actions.act_window">
+            <field name="name">Kirim via SCP</field>
+            <field name="src_model">db.backup</field>
+            <field name="binding_model_id" ref="model_db_backup"/>
+            <field name="binding_view_types">tree</field>
+            <field name="res_model">db.backup.scp.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <!-- <field name="context"></field> -->
+        </record>
+            
 
         <!-- Form view -->
         <record id="view_db_backup_form" model="ir.ui.view">
