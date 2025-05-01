@@ -30,11 +30,6 @@ class DbBackupSCPWizard(models.TransientModel):
             if not os.path.exists(file_path):
                 raise UserError(f"File tidak ditemukan: {file_path}")
             try:
-                var_dump(file_path),
-                var_dump(self.scp_user),
-                var_dump(self.scp_host),
-                var_dump(self.scp_path),
-                var_dump(self.scp_private_key),
                 subprocess.run([
                     'scp', '-i', self.scp_private_key,
                     file_path,
