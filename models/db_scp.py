@@ -1,6 +1,5 @@
 import os
 import subprocess
-from var_dump import var_dump
 
 from odoo import models, fields, api
 from odoo.exceptions import UserError
