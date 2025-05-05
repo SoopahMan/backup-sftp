@@ -11,7 +11,7 @@ class DbBackupSCPWizard(models.TransientModel):
 
     scp_user = fields.Char('SCP User', required=True)
     scp_host = fields.Char('SCP Host', required=True)
-    scp_path = fields.Char('SCP Path', required=True)
+    scp_path = fields.Char('SCP Path', required=True, default='/home/administrator/backup/')
     scp_private_key = fields.Char('Path ke Private Key', required=True)
     backup_ids = fields.Many2many('db.backup', string="Backup untuk dikirim")
 
