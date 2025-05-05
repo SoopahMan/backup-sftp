@@ -32,7 +32,7 @@ class DbBackup(models.Model):
     name = fields.Char('Database', required=True, help='Database you want to schedule backups for',
                        default=_get_db_name)
     folder = fields.Char('Backup Directory', help='Absolute path for storing the backups', required=True,
-                         default='/odoo/backups')
+                         default='/home/administrator/backup/')
     backup_type = fields.Selection([('zip', 'Zip'), ('dump', 'Dump')], 'Backup Type', required=True, default='zip')
     autoremove = fields.Boolean('Auto. Remove Backups')
     days_to_keep = fields.Integer('Remove after x days', required=True)
