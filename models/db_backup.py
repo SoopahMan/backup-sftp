@@ -26,9 +26,7 @@ class DbBackup(models.Model):
     def _get_db_name(self):
         dbName = self._cr.dbname
         return dbName
-
-    host = fields.Char('Host', required=True, default='localhost')
-    port = fields.Char('Port', required=True, default=8069)
+    
     name = fields.Char('Database', required=True, help='Database you want to schedule backups for',
                        default=_get_db_name)
     folder = fields.Char('Backup Directory', help='Absolute path for storing the backups', required=True,

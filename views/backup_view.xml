@@ -44,8 +44,6 @@
                 <form string="Database Backup Configuration">
                     <sheet>
                         <group>
-                            <field name="host"/>
-                            <field name="port"/>
                             <field name="name"/>
                             <field name="folder"/>
                             <field name="backup_type"/>
