@@ -30,6 +30,7 @@
                     <field name="backup_type"/>
                     <field name="autoremove"/>
                     <field name="days_to_keep"/>
+                    <field name="active"/> 
                     <!-- Tombol Aksi Kirim via SCP -->
                     <button name="%(action_open_scp_wizard)d" string="Kirim via SCP" type="action" class="btn-primary"/>
                 </tree>
@@ -49,6 +50,7 @@
                             <field name="backup_type"/>
                             <field name="autoremove"/>
                             <field name="days_to_keep"/>
+                            <field name="active"/> 
                             <button name="action_backup_now" string="Backup Sekarang" type="object" class="btn-primary"/>
                         </group>
                         <footer>

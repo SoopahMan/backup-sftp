@@ -35,6 +35,9 @@ class DbBackup(models.Model):
     autoremove = fields.Boolean('Auto. Remove Backups')
     days_to_keep = fields.Integer('Remove after x days', required=True)
 
+    active = fields.Boolean(string='Aktif', default=True, help='Tentukan apakah backup ini akan dijalankan oleh otomatisasi')
+
+
     def action_backup_now(self):
         self.ensure_one()
         if not os.path.isdir(self.folder):
@@ -193,5 +196,23 @@ class DbBackup(models.Model):
             'url': f'/web/content?model={self._name}&id={self.id}&field=file_data&filename_field=file_name&download=true',
             'target': 'self',
         }
+    
+    @api.onchange('active')
+    def _onchange_active(self):
+        if self.active:
+            others = self.search([('id', '!=', self.id), ('active', '=', True)])
+            for record in others:
+                record.active = False
+
+    @api.constrains('active')
+    def _check_only_one_active(self):
+        for rec in self:
+            if rec.active:
+                other_active = self.search([
+                    ('id', '!=', rec.id),
+                    ('active', '=', True)
+                ], limit=1)
+                if other_active:
+                    raise ValidationError("Hanya satu backup yang boleh aktif dalam satu waktu. Nonaktifkan yang lain terlebih dahulu.")
     
 
