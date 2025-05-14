@@ -5,6 +5,20 @@
         <!-- Root Menu -->
         <menuitem id="menu_backup_root" name="Database Backups" sequence="10"/>
 
+
+        <record id="view_db_backup_search" model="ir.ui.view">
+            <field name="name">db.backup.search</field>
+            <field name="model">db.backup</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name"/>
+                    <filter string="Aktif" domain="[('active','=',True)]"/>
+                    <filter string="Tidak Aktif" domain="[('active','=',False)]"/>
+                    <separator/>
+                    <field name="backup_type"/>
+                </search>
+            </field>
+        </record>
         <!-- Action untuk konfigurasi backup -->
         <record id="action_backup" model="ir.actions.act_window">
             <field name="name">Configure back-ups</field>
@@ -39,19 +53,7 @@
             </field>
         </record>
 
-        <record id="view_db_backup_search" model="ir.ui.view">
-            <field name="name">db.backup.search</field>
-            <field name="model">db.backup</field>
-            <field name="arch" type="xml">
-                <search>
-                    <field name="name"/>
-                    <filter string="Aktif" domain="[('active','=',True)]"/>
-                    <filter string="Tidak Aktif" domain="[('active','=',False)]"/>
-                    <separator/>
-                    <field name="backup_type"/>
-                </search>
-            </field>
-        </record>
+        
 
 
         <!-- Form view -->
