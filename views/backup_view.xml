@@ -13,7 +13,6 @@
                     <field name="name"/>
                     <filter string="Aktif" domain="[('active','=',True)]"/>
                     <filter string="Tidak Aktif" domain="[('active','=',False)]"/>
-                    <field name="backup_type"/>
                 </search>
             </field>
         </record>
