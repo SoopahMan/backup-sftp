@@ -10,6 +10,7 @@
             <field name="name">Configure back-ups</field>
             <field name="res_model">db.backup</field>
             <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
         </record>
 
         <!-- Menu Backup Configurations -->
