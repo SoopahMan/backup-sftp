@@ -37,6 +37,17 @@ class DbBackup(models.Model):
 
     active = fields.Boolean(string='Aktif', default=True, help='Tentukan apakah backup ini akan dijalankan oleh otomatisasi')
 
+    @api.model
+    def create(self, vals):
+        if vals.get('active'):
+            self.search([]).write({'active': False})
+        return super(DbBackup, self).create(vals)
+    
+    def write(self, vals):
+        if vals.get('active'):
+            for rec in self.filtered(lambda x: x.id):
+                self.search([('id', '!=', rec.id)]).write({'active': False})
+        return super(DbBackup, self).write(vals)
 
     def action_backup_now(self):
         self.ensure_one()
@@ -214,5 +225,7 @@ class DbBackup(models.Model):
                 ], limit=1)
                 if other_active:
                     raise ValidationError("Hanya satu backup yang boleh aktif dalam satu waktu. Nonaktifkan yang lain terlebih dahulu.")
+                
+    
     
 
