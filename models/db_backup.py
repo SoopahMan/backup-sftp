@@ -8,7 +8,7 @@ import base64
 import subprocess
 
 from odoo import models, fields, api, tools, _
-from odoo.exceptions import Warning, AccessDenied, UserError
+from odoo.exceptions import Warning, AccessDenied, UserError, ValidationError
 import odoo
 
 import logging
@@ -24,30 +24,33 @@ class DbBackup(models.Model):
     file_name = fields.Char(string='Nama File')
 
     def _get_db_name(self):
-        dbName = self._cr.dbname
-        return dbName
-    
-    name = fields.Char('Database', required=True, help='Database you want to schedule backups for',
+        return self._cr.dbname
+
+    name = fields.Char('Database', required=True, help='Database yang akan dibackup secara terjadwal',
                        default=_get_db_name)
-    folder = fields.Char('Backup Directory', help='Absolute path for storing the backups', required=True,
+    folder = fields.Char('Backup Directory', help='Path absolut untuk menyimpan backup', required=True,
                          default='/home/administrator/backup/')
     backup_type = fields.Selection([('zip', 'Zip'), ('dump', 'Dump')], 'Backup Type', required=True, default='zip')
     autoremove = fields.Boolean('Auto. Remove Backups')
-    days_to_keep = fields.Integer('Remove after x days', required=True)
-
+    days_to_keep = fields.Integer('Hapus setelah x hari', required=True)
     active = fields.Boolean(string='Aktif', default=True, help='Tentukan apakah backup ini akan dijalankan oleh otomatisasi')
+
+    scp_user = fields.Char(string='SCP User')
+    scp_host = fields.Char(string='SCP Host')
+    scp_path = fields.Char(string='SCP Path')
+    scp_private_key = fields.Char(string='SCP Private Key Path')
 
     @api.model
     def create(self, vals):
         if vals.get('active'):
             self.search([]).write({'active': False})
         return super(DbBackup, self).create(vals)
-    
+
     def write(self, vals):
-        if vals.get('active'):
-            for rec in self.filtered(lambda x: x.id):
-                self.search([('id', '!=', rec.id)]).write({'active': False})
-        return super(DbBackup, self).write(vals)
+        result = super(DbBackup, self).write(vals)
+        if vals.get('active') and self.ids:
+            self.search([('id', 'not in', self.ids)]).write({'active': False})
+        return result
 
     def action_backup_now(self):
         self.ensure_one()
@@ -77,7 +80,7 @@ class DbBackup(models.Model):
         except Exception as error:
             _logger.error("Error while doing manual backup: %s", str(error))
             raise UserError("Gagal melakukan backup sekarang: %s" % str(error))
-        
+
     def action_send_scp_only(self):
         self.ensure_one()
 
@@ -103,24 +106,24 @@ class DbBackup(models.Model):
 
     @api.model
     def schedule_backup(self):
-        conf_ids = self.search([])
+        conf_ids = self.search([('active', '=', True)])
         for rec in conf_ids:
             try:
                 if not os.path.isdir(rec.folder):
                     os.makedirs(rec.folder)
-            except:
-                raise
+            except Exception as e:
+                _logger.error(f"Gagal membuat direktori backup: {e}")
+                continue
 
             bkp_file = '%s_%s.%s' % (time.strftime('%Y_%m_%d_%H_%M_%S'), rec.name, rec.backup_type)
             file_path = os.path.join(rec.folder, bkp_file)
-            fp = open(file_path, 'wb')
+
             try:
-                fp = open(file_path, 'wb')
-                self._take_dump(rec.name, fp, 'db.backup', rec.backup_type)
-                fp.close()
+                with open(file_path, 'wb') as fp:
+                    self._take_dump(rec.name, fp, 'db.backup', rec.backup_type)
             except Exception as error:
-                _logger.debug("Couldn't backup database %s.", rec.name)
-                _logger.debug("Exact error: %s", str(error))
+                _logger.debug("Gagal backup database %s.", rec.name)
+                _logger.debug("Error: %s", str(error))
                 continue
 
             if rec.autoremove:
@@ -128,14 +131,17 @@ class DbBackup(models.Model):
                 for f in os.listdir(directory):
                     fullpath = os.path.join(directory, f)
                     if rec.name in fullpath:
-                        timestamp = os.stat(fullpath).st_ctime
-                        createtime = datetime.datetime.fromtimestamp(timestamp)
-                        now = datetime.datetime.now()
-                        delta = now - createtime
-                        if delta.days >= rec.days_to_keep:
-                            if os.path.isfile(fullpath) and (".dump" in f or '.zip' in f):
-                                _logger.info("Delete local out-of-date file: %s", fullpath)
-                                os.remove(fullpath)
+                        try:
+                            timestamp = os.stat(fullpath).st_ctime
+                            createtime = datetime.datetime.fromtimestamp(timestamp)
+                            now = datetime.datetime.now()
+                            delta = now - createtime
+                            if delta.days >= rec.days_to_keep:
+                                if os.path.isfile(fullpath) and (".dump" in f or '.zip' in f):
+                                    _logger.info("Menghapus file lama: %s", fullpath)
+                                    os.remove(fullpath)
+                        except Exception as e:
+                            _logger.warning(f"Gagal menghapus file: {e}")
 
     def _take_dump(self, db_name, stream, model, backup_format='zip'):
         cron_user_id = self.env.ref('backup-sftp.backup_scheduler').user_id.id
@@ -161,18 +167,11 @@ class DbBackup(models.Model):
                 odoo.tools.exec_pg_command(*cmd)
                 if stream:
                     odoo.tools.osutil.zip_dir(dump_dir, stream, include_dir=False, fnct_sort=lambda file_name: file_name != 'dump.sql')
-                else:
-                    t = tempfile.TemporaryFile()
-                    odoo.tools.osutil.zip_dir(dump_dir, t, include_dir=False, fnct_sort=lambda file_name: file_name != 'dump.sql')
-                    t.seek(0)
-                    return t
         else:
             cmd.insert(-1, '--format=c')
             stdin, stdout = odoo.tools.exec_pg_command_pipe(*cmd)
             if stream:
                 shutil.copyfileobj(stdout, stream)
-            else:
-                return stdout
 
     def _dump_db_manifest(self, cr):
         pg_version = "%d.%d" % divmod(cr._obj.connection.server_version / 100, 100)
@@ -207,10 +206,10 @@ class DbBackup(models.Model):
             'url': f'/web/content?model={self._name}&id={self.id}&field=file_data&filename_field=file_name&download=true',
             'target': 'self',
         }
-    
+
     @api.onchange('active')
     def _onchange_active(self):
-        if self.active:
+        if self.active and self.id:
             others = self.search([('id', '!=', self.id), ('active', '=', True)])
             for record in others:
                 record.active = False
@@ -218,14 +217,10 @@ class DbBackup(models.Model):
     @api.constrains('active')
     def _check_only_one_active(self):
         for rec in self:
-            if rec.active:
+            if rec.active and rec.id:
                 other_active = self.search([
                     ('id', '!=', rec.id),
                     ('active', '=', True)
                 ], limit=1)
                 if other_active:
                     raise ValidationError("Hanya satu backup yang boleh aktif dalam satu waktu. Nonaktifkan yang lain terlebih dahulu.")
-                
-    
-    
-
