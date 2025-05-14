@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" ?>
 <odoo>
     <data noupdate="1">
         <record id="ir_cron_db_backup" model="ir.cron">
@@ -11,6 +11,7 @@
             <field name="numbercall">-1</field>  
             <field name="nextcall">2025-01-01 00:00:00</field> 
             <field name="active" eval="True"/>  
+            <field name="activity_user_type">user</field>
         </record>
     </data>
 </odoo>
