@@ -10,7 +10,7 @@
             <field name="numbercall">-1</field>  <!-- Set menjadi -1 untuk tidak terbatas -->
             <field name="nextcall">2025-01-01 00:00:00</field> <!-- Waktu pertama kali cron job dijalankan -->
             <field name="active" eval="True"/>  <!-- Menandakan cron job ini aktif -->
-            <field name="activity_user_type">user</field>
+            <!-- <field name="activity_user_type">user</field> -->
         </record>
     </data>
 </odoo>
