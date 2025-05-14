@@ -34,7 +34,7 @@ class DbBackup(models.Model):
     backup_type = fields.Selection([('zip', 'Zip'), ('dump', 'Dump')], 'Backup Type', required=True, default='zip')
     autoremove = fields.Boolean('Auto. Remove Backups')
     days_to_keep = fields.Integer('Hapus setelah x hari', required=True)
-    active = fields.Boolean(string='Aktif', default=True, help='Tentukan apakah backup ini akan dijalankan oleh otomatisasi')
+    active = fields.Boolean(default=True)
 
     scp_user = fields.Char(string='SCP User')
     scp_host = fields.Char(string='SCP Host')
