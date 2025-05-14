@@ -18,6 +18,7 @@ _logger = logging.getLogger(__name__)
 class DbBackup(models.Model):
     _name = 'db.backup'
     _description = 'Backup configuration record'
+    _inactive_visibility = 'visible'
 
     name = fields.Char(string='Nama')
     file_data = fields.Binary(string='File Download')
