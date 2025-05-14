@@ -6,7 +6,6 @@
         <menuitem id="menu_backup_root" name="Database Backups" sequence="10"/>
 
         <record id="view_db_backup_search" model="ir.ui.view">
-            <field name="name">db.backup.search</field>
             <field name="model">db.backup</field>
             <field name="arch" type="xml">
                 <search>
