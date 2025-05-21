@@ -24,11 +24,42 @@ class DbBackup(models.Model):
     file_data = fields.Binary(string='File Download')
     file_name = fields.Char(string='Nama File')
 
-    def _get_db_name(self):
-        return self._cr.dbname
+    def _get_db_list(self):
+        """Mengambil daftar semua database dari PostgreSQL."""
+        db_list = []
+        try:
+            # Konfigurasi koneksi PostgreSQL (sesuaikan dengan pengaturan Odoo Anda)
+            pg_host = odoo.tools.config['db_host'] or 'localhost'
+            pg_port = odoo.tools.config['db_port'] or 5432
+            pg_user = odoo.tools.config['db_user'] or 'odoo'
+            pg_password = odoo.tools.config['db_password'] or ''  # Mungkin kosong
+            conn = psycopg2.connect(
+                host=pg_host,
+                port=pg_port,
+                user=pg_user,
+                password=pg_password,
+            )
+            conn.autocommit = True  # Penting untuk menjalankan perintah di luar transaksi
+            cur = conn.cursor()
+            cur.execute("SELECT datname FROM pg_database WHERE datistemplate = false;")
+            databases = cur.fetchall()
+            for db in databases:
+                db_list.append((db[0], db[0]))  # Membuat list of tuples untuk field.Selection
+            cur.close()
+            conn.close()
+        except Exception as e:
+            _logger.error("Gagal mendapatkan daftar database: %s", e)
+            # Jika gagal, kembalikan list kosong atau database saat ini sebagai fallback
+            db_list = [(self._cr.dbname, self._cr.dbname)]
+        return db_list
 
-    name = fields.Char('Database', required=True, help='Database yang akan dibackup secara terjadwal',
-                       default=_get_db_name)
+    name = fields.Selection(
+        selection=_get_db_list,
+        string='Database',
+        required=True,
+        help='Database yang akan dibackup secara terjadwal',
+        default=lambda self: self._cr.dbname  # Default ke database saat ini
+    )
     folder = fields.Char('Backup Directory', help='Path absolut untuk menyimpan backup', required=True,
                          default='/home/administrator/backup/')
     backup_type = fields.Selection([('zip', 'Zip'), ('dump', 'Dump')], 'Backup Type', required=True, default='zip')
