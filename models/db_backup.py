@@ -29,9 +29,9 @@ class DbBackup(models.Model):
         db_list = []
         try:
             # Konfigurasi koneksi PostgreSQL (sesuaikan dengan pengaturan Odoo Anda)
-            pg_host = odoo.tools.config['db_host'] or 'localhost'
+            pg_host = odoo.tools.config['db_host']
             pg_port = odoo.tools.config['db_port'] or 5432
-            pg_user = odoo.tools.config['db_user'] or 'odoo'
+            pg_user = odoo.tools.config['db_user'] or 'postgres'
             pg_password = odoo.tools.config['db_password'] or ''  # Mungkin kosong
             conn = psycopg2.connect(
                 host=pg_host,
