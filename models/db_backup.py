@@ -36,10 +36,10 @@ class DbBackup(models.Model):
     days_to_keep = fields.Integer('Hapus setelah x hari', required=True)
     active = fields.Boolean(default=True)
 
-    scp_user = fields.Char(string='SCP User')
-    scp_host = fields.Char(string='SCP Host')
-    scp_path = fields.Char(string='SCP Path')
-    scp_private_key = fields.Char(string='SCP Private Key Path')
+    scp_user = fields.Char(string='SCP User', default='administrator',)
+    scp_host = fields.Char(string='SCP Host', default='10.10.121.132')
+    scp_path = fields.Char(string='SCP Path', default='/home/administrator/backup/')
+    scp_private_key = fields.Char(string='SCP Private Key Path', default='/home/administrator/.ssh/id_rsa.pub.')
 
     @api.model
     def create(self, vals):
@@ -106,6 +106,7 @@ class DbBackup(models.Model):
             raise UserError("Konfigurasi SCP belum lengkap.")
 
     @api.model
+    @api.model
     def schedule_backup(self):
         conf_ids = self.search([('active', '=', True)])
         for rec in conf_ids:
@@ -121,12 +122,28 @@ class DbBackup(models.Model):
 
             try:
                 with open(file_path, 'wb') as fp:
-                    self._take_dump(rec.name, fp, 'db.backup', rec.backup_type)
+                    rec._take_dump(rec.name, fp, rec._name, rec.backup_type)
             except Exception as error:
-                _logger.debug("Gagal backup database %s.", rec.name)
-                _logger.debug("Error: %s", str(error))
+                _logger.error("Gagal backup database %s. Error: %s", rec.name, str(error))
                 continue
 
+            # ========== Kirim via SCP jika konfigurasi lengkap ==========
+            if rec.scp_user and rec.scp_host and rec.scp_path and rec.scp_private_key:
+                try:
+                    _logger.info(f"Mengirim file backup {bkp_file} ke SCP: {rec.scp_user}@{rec.scp_host}:{rec.scp_path}")
+                    subprocess.run([
+                        'scp', '-i', rec.scp_private_key,
+                        file_path,
+                        f"{rec.scp_user}@{rec.scp_host}:{rec.scp_path}"
+                    ], check=True)
+                except subprocess.CalledProcessError as e:
+                    _logger.error(f"SCP transfer failed for file {bkp_file}: {e}")
+                except Exception as e:
+                    _logger.error(f"Kesalahan umum saat SCP: {e}")
+            else:
+                _logger.info(f"SCP tidak dikonfigurasi lengkap untuk backup {bkp_file}")
+
+            # ========== Auto remove old backups ==========
             if rec.autoremove:
                 directory = rec.folder
                 for f in os.listdir(directory):
@@ -143,6 +160,7 @@ class DbBackup(models.Model):
                                     os.remove(fullpath)
                         except Exception as e:
                             _logger.warning(f"Gagal menghapus file: {e}")
+
 
     def _take_dump(self, db_name, stream, model, backup_format='zip'):
         cron_user_id = self.env.ref('backup-sftp.backup_scheduler').user_id.id
