@@ -67,7 +67,7 @@
                         </group>
                         <footer>
                             <button name="action_backup_now" string="Backup Sekarang" type="object" class="btn-primary"/>
-                            <button name="%(action_open_scp_wizard)d" string="Kirim via SCP" type="action" class="btn-secondary"/>
+                            <button name="action_send_scp_only" string="Kirim via SCP" type="action" class="btn-secondary"/>
                         </footer>
                     </sheet>
                 </form>
@@ -75,7 +75,7 @@
         </record>
 
         <!-- View Form Wizard SCP -->
-        <!-- <record id="view_backup_scp_wizard_form_view" model="ir.ui.view">
+        <record id="view_backup_scp_wizard_form_view" model="ir.ui.view">
             <field name="name">db.backup.scp.wizard.form</field>
             <field name="model">db.backup.scp.wizard</field>
             <field name="arch" type="xml">
@@ -93,7 +93,7 @@
                     </footer>
                 </form>
             </field>
-        </record> -->
+        </record>
 
         <!-- Action Window untuk wizard SCP -->
         <record id="action_backup_scp_wizard" model="ir.actions.act_window">
