@@ -5,7 +5,7 @@
             <field name="name">Backup Ravi</field>
             <field name="model_id" ref="backup-sftp.model_db_backup"/>
             <field name="state">code</field>
-            <field name="code">model.search([('active', '=', True)], limit=1).action_backup_now()</field>
+            <field name="code">model.search([('active', '=', True)], limit=1).schedule_backup()</field>
             <field name="interval_number">1</field>  
             <field name="interval_type">days</field> 
             <field name="numbercall">-1</field>  
