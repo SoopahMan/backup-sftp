@@ -36,10 +36,10 @@ class DbBackup(models.Model):
     days_to_keep = fields.Integer('Hapus setelah x hari', required=True)
     active = fields.Boolean(default=True)
 
-    scp_user = fields.Char(string='administrator',)
-    scp_host = fields.Char(string='10.10.121.132')
-    scp_path = fields.Char(string='/home/administrator/backup/')
-    scp_private_key = fields.Char(string='/home/administrator/.ssh/id_rsa.pub.')
+    scp_user = fields.Char(string='SCP User', default='administrator',)
+    scp_host = fields.Char(string='SCP Host', default='10.10.121.132')
+    scp_path = fields.Char(string='SCP Path', default='/home/administrator/backup/')
+    scp_private_key = fields.Char(string='SCP Private Key Path', default='/home/administrator/.ssh/id_rsa.pub.')
 
     @api.model
     def create(self, vals):
